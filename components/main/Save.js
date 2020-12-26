@@ -2,8 +2,8 @@ import React, { useState } from 'react'
 import { Image, TextInput, View, Button } from 'react-native'
 import firebase from 'firebase'
 import { NavigationContainer } from '@react-navigation/native';
-require('firebase/firestore');
-require('firebase/firebase-storage');
+import 'firebase/firestore';
+import 'firebase/firebase-storage';
 export default function Save({ route, navigation }) {
     console.log(route.params.image);
     const [caption, setCaption] = useState('')
@@ -17,25 +17,28 @@ export default function Save({ route, navigation }) {
                             .put(blob)
 
         const  taskProgress = snapshot => {
-            console.log(`transferred: ${snapshot.bytesTransferred}`);
+         console.log(`transferred: ${snapshot.bytesTransferred}`);
         }                 
         
         const taskCompleted = () => {
-            task.ref.getDownloadURL().then((snapshot)=>{
+            task.snapshot.ref.getDownloadURL().then((snapshot)=>{
                 savePost(snapshot)
-                console.log(snapshot);
+
+               // console.log(snapshot);
             })
 
         }
 
         const taskError = snapshot => {
-            console.log(snapshot);
+           // console.log(snapshot);
+           console.log("error?")
         }
 
-        task.on("state_change",taskProgress,taskError,taskCompleted);
+        task.on("state_changed",taskProgress,taskError,taskCompleted);
 
     }
     const savePost =(downloadURL) => {
+        console.log('se llamo aqui');
         firebase.firestore().collection('posts').doc(firebase.auth().currentUser.uid)
         .collection("userPosts")
         .add({
@@ -43,6 +46,7 @@ export default function Save({ route, navigation }) {
             caption,
             creation: firebase.firestore.FieldValue.serverTimestamp()
         }).then(function(){
+            console.log('hello there')
             navigation.popToTop();
         })
     }
