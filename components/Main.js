@@ -3,13 +3,14 @@ import {View, Text} from 'react-native'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {connect} from 'react-redux';
 import { bindActionCreators } from 'redux';
-import {fetchUser, fetchUserPosts} from '../redux/actions/index';
+import {fetchUser, fetchUserPosts, fetchUserFollowing} from '../redux/actions/index';
 import { NavigationContainer } from '@react-navigation/native';
 import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
 import Feed from './main/feed'
+import Search from  './main/Search'
+import Profile from './main/Profile'
 
-import Profile from './main/Profile';
-import { event } from 'react-native-reanimated';
+import firebase from 'firebase';
 const Tab = createMaterialBottomTabNavigator();
 
 const EmptyScreen =()  => {
@@ -20,6 +21,7 @@ class Main extends Component {
     componentDidMount(){
         this.props.fetchUser()
         this.props.fetchUserPosts()
+        this.props.fetchUserFollowing()
 
     }
     render() {
@@ -44,9 +46,24 @@ class Main extends Component {
                         <MaterialCommunityIcons name="plus-box" color={color} size={26} />
                     )
                 }} />
-                 <Tab.Screen name="Profile" component={Profile} options={{
+                 <Tab.Screen name="Profile"
+                     component={Profile} 
+                     listeners={({navigation})=>({
+                        tabPress: event => {
+                            event.preventDefault();
+                            navigation.navigate('Profile', {uid: firebase.auth().currentUser.uid})
+                        }
+                    })} 
+                    
+                    options={{
                     tabBarIcon: ({color, size})=>(
                         <MaterialCommunityIcons name="account-circle" color={color} size={26} />
+                    )
+                }} />
+
+                <Tab.Screen name="Search" component={Search} navigation={this.props.navigation} options={{
+                    tabBarIcon: ({color, size})=>(
+                        <MaterialCommunityIcons name="account-search-outline" color={color} size={26} />
                     )
                 }} />
             </Tab.Navigator>
@@ -56,8 +73,9 @@ class Main extends Component {
 }
 
 const mapStateToProps = (store) => ({
-    currentUser: store.userState.currentUser
+    currentUser: store.userState.currentUser,
+   
 })
-const mapDispatchProps = (dispatch) => bindActionCreators({ fetchUser, fetchUserPosts }, dispatch);
+const mapDispatchProps = (dispatch) => bindActionCreators({ fetchUser, fetchUserPosts, fetchUserFollowing }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchProps)(Main);

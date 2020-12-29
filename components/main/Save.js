@@ -23,7 +23,7 @@ export default function Save({ route, navigation }) {
         const taskCompleted = () => {
             task.snapshot.ref.getDownloadURL().then((snapshot)=>{
                 savePost(snapshot)
-
+                console.log('done!');
                // console.log(snapshot);
             })
 
